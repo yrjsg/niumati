@@ -35,7 +35,7 @@ function sampleQuestions(): Question[] {
   // 打乱每题的选项顺序（避免 null 总是 C）
   return picked.map(q => ({
     ...q,
-    choices: [...q.choices].sort(() => Math.random() - 0.5),
+    choices: ([...q.choices].sort(() => Math.random() - 0.5) as [typeof q.choices[0], typeof q.choices[1], typeof q.choices[2]]),
   }));
 }
 
