@@ -1,6 +1,6 @@
 /**
  * 生成分享卡片图片
- * 画布尺寸 750×1334（iPhone 6/7/8 屏幕比例，适合社交媒体）
+ * 画布尺寸 540×960（缩小以确保手机分享面板能正常显示预览）
  */
 
 import type { Niuma } from '@/lib/data';
@@ -8,8 +8,8 @@ import QRCode from 'qrcode';
 
 const SITE_URL = 'https://niumati.vercel.app';
 
-const W = 750;
-const H = 1334;
+const W = 540;
+const H = 960;
 
 export async function generateShareImage(
   type: Niuma,
@@ -33,17 +33,17 @@ export async function generateShareImage(
   ctx.strokeStyle = 'rgba(255,255,255,0.06)';
   ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.moveTo(60, 80);
-  ctx.lineTo(W - 60, 80);
+  ctx.moveTo(40, 55);
+  ctx.lineTo(W - 40, 55);
   ctx.stroke();
   ctx.beginPath();
-  ctx.moveTo(60, H - 80);
-  ctx.lineTo(W - 60, H - 80);
+  ctx.moveTo(40, H - 55);
+  ctx.lineTo(W - 40, H - 55);
   ctx.stroke();
 
   // ── 头部：头像(左) + 类型信息(右) ─────────────────────
-  const headerY = 130;
-  const avatarSize = 180;
+  const headerY = 90;
+  const avatarSize = 130;
 
   // 头像 - 左侧
   if (avatarSvgElement) {
@@ -55,83 +55,83 @@ export async function generateShareImage(
       const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
       const url = URL.createObjectURL(svgBlob);
       const img = await loadImage(url);
-      ctx.drawImage(img, 60, headerY, avatarSize, avatarSize);
+      ctx.drawImage(img, 40, headerY, avatarSize, avatarSize);
       URL.revokeObjectURL(url);
     } catch {
-      ctx.font = '80px serif';
+      ctx.font = '60px serif';
       ctx.textAlign = 'left';
-      ctx.fillText(type.emoji, 80, headerY + avatarSize * 0.7);
+      ctx.fillText(type.emoji, 50, headerY + avatarSize * 0.7);
     }
   } else {
-    ctx.font = '80px serif';
+    ctx.font = '60px serif';
     ctx.textAlign = 'left';
-    ctx.fillText(type.emoji, 80, headerY + avatarSize * 0.7);
+    ctx.fillText(type.emoji, 50, headerY + avatarSize * 0.7);
   }
 
-  // 类型信息 - 右侧（有更多横向空间）
-  const infoX = 60 + avatarSize + 30;
+  // 类型信息 - 右侧
+  const infoX = 40 + avatarSize + 20;
   ctx.textAlign = 'left';
 
-  ctx.font = '20px sans-serif';
+  ctx.font = '14px sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,0.4)';
-  ctx.fillText('你的牛马类型', infoX, headerY + 32);
+  ctx.fillText('你的牛马类型', infoX, headerY + 22);
 
-  ctx.font = 'bold 56px ui-monospace, SFMono-Regular, monospace';
+  ctx.font = 'bold 40px ui-monospace, SFMono-Regular, monospace';
   ctx.fillStyle = '#ffffff';
-  ctx.fillText(type.code, infoX, headerY + 90);
+  ctx.fillText(type.code, infoX, headerY + 64);
 
-  ctx.font = 'bold 40px "PingFang SC", "Microsoft YaHei", sans-serif';
+  ctx.font = 'bold 28px "PingFang SC", "Microsoft YaHei", sans-serif';
   ctx.fillStyle = '#ffffff';
-  ctx.fillText(type.name, infoX, headerY + 140);
+  ctx.fillText(type.name, infoX, headerY + 100);
 
-  ctx.font = '24px "PingFang SC", "Microsoft YaHei", sans-serif';
+  ctx.font = '17px "PingFang SC", "Microsoft YaHei", sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,0.5)';
-  ctx.fillText(`「${type.tagline}」`, infoX, headerY + 175);
+  ctx.fillText(`「${type.tagline}」`, infoX, headerY + 125);
 
   // ── 描述 ──────────────────────────────────────────────
-  let y = headerY + avatarSize + 50;
-  ctx.font = '28px "PingFang SC", "Microsoft YaHei", sans-serif';
+  let y = headerY + avatarSize + 35;
+  ctx.font = '20px "PingFang SC", "Microsoft YaHei", sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,0.75)';
   ctx.textAlign = 'left';
-  const descLines = wrapText(ctx, type.description, W - 140);
+  const descLines = wrapText(ctx, type.description, W - 100);
   for (const line of descLines) {
-    ctx.fillText(line, 70, y);
-    y += 44;
+    ctx.fillText(line, 50, y);
+    y += 32;
   }
 
   // ── 名人名言 ──────────────────────────────────────────
   if (quote) {
-    y += 20;
-    const boxPadding = 30;
+    y += 14;
+    const boxPadding = 20;
     const quoteText = `「${quote.text}」`;
-    ctx.font = '24px "PingFang SC", "Microsoft YaHei", sans-serif';
-    const quoteLines = wrapText(ctx, quoteText, W - 140 - boxPadding * 2);
-    const boxH = quoteLines.length * 38 + 40 + boxPadding * 2;
+    ctx.font = '17px "PingFang SC", "Microsoft YaHei", sans-serif';
+    const quoteLines = wrapText(ctx, quoteText, W - 100 - boxPadding * 2);
+    const boxH = quoteLines.length * 28 + 32 + boxPadding * 2;
 
     ctx.fillStyle = 'rgba(255,255,255,0.05)';
     ctx.strokeStyle = 'rgba(255,255,255,0.1)';
     ctx.lineWidth = 1;
-    const boxX = 70;
-    const boxW = W - 140;
-    roundRect(ctx, boxX, y, boxW, boxH, 16);
+    const boxX = 50;
+    const boxW = W - 100;
+    roundRect(ctx, boxX, y, boxW, boxH, 12);
 
     ctx.textAlign = 'center';
-    ctx.font = 'italic 24px "PingFang SC", "Microsoft YaHei", sans-serif';
+    ctx.font = 'italic 17px "PingFang SC", "Microsoft YaHei", sans-serif';
     ctx.fillStyle = 'rgba(255,255,255,0.6)';
-    let qy = y + boxPadding + 28;
+    let qy = y + boxPadding + 20;
     for (const line of quoteLines) {
       ctx.fillText(line, W / 2, qy);
-      qy += 38;
+      qy += 28;
     }
-    ctx.font = '20px "PingFang SC", "Microsoft YaHei", sans-serif';
+    ctx.font = '14px "PingFang SC", "Microsoft YaHei", sans-serif';
     ctx.fillStyle = 'rgba(255,255,255,0.3)';
-    ctx.fillText(`—— ${quote.author}`, W / 2, qy + 10);
-    y = qy + 30;
+    ctx.fillText(`—— ${quote.author}`, W / 2, qy + 8);
+    y = qy + 24;
   }
 
   // ── 二维码（名人名言下方，居中） ─────────────────────────
-  const qrSize = 140;
-  const qrY = y + 20;
+  const qrSize = 100;
+  const qrY = y + 14;
   try {
     const qrDataUrl = await QRCode.toDataURL(SITE_URL, {
       width: qrSize,
@@ -142,22 +142,22 @@ export async function generateShareImage(
     ctx.drawImage(qrImg, (W - qrSize) / 2, qrY, qrSize, qrSize);
 
     ctx.textAlign = 'center';
-    ctx.font = '18px "PingFang SC", "Microsoft YaHei", sans-serif';
+    ctx.font = '13px "PingFang SC", "Microsoft YaHei", sans-serif';
     ctx.fillStyle = 'rgba(255,255,255,0.3)';
-    ctx.fillText('扫码来测测你是哪种牛马', W / 2, qrY + qrSize + 24);
+    ctx.fillText('扫码来测测你是哪种牛马', W / 2, qrY + qrSize + 18);
   } catch {
     // QR 生成失败时跳过
   }
 
   // ── 底部品牌 ──────────────────────────────────────────
   ctx.textAlign = 'center';
-  ctx.font = 'bold 24px "PingFang SC", "Microsoft YaHei", sans-serif';
+  ctx.font = 'bold 17px "PingFang SC", "Microsoft YaHei", sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,0.2)';
-  ctx.fillText('🐂 码农牛马测试', W / 2, H - 40);
+  ctx.fillText('🐂 码农牛马测试', W / 2, H - 28);
 
-  // ── 导出 PNG（PNG 在手机分享面板中预览兼容性更好）────
+  // ── 导出 JPEG（文件更小，手机分享预览更流畅）────────────
   return new Promise((resolve) => {
-    canvas.toBlob((blob) => resolve(blob!), 'image/png');
+    canvas.toBlob((blob) => resolve(blob!), 'image/jpeg', 0.85);
   });
 }
 
