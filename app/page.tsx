@@ -169,31 +169,36 @@ function Result({ type, onReset }: { type: Niuma; onReset: () => void }) {
   const nemesis = getTypeByCode(type.nemesis);
   const avatarRef = useRef<HTMLDivElement>(null);
   const [sharing, setSharing] = useState(false);
+  const [shareTip, setShareTip] = useState('');
 
   const handleShare = useCallback(async () => {
     setSharing(true);
     try {
       const svgEl = avatarRef.current?.querySelector('svg') as SVGSVGElement | null;
       const blob = await generateShareImage(type, svgEl);
-      const file = new File([blob], `niumati-${type.code}.png`, { type: 'image/png' });
 
-      if (navigator.share && navigator.canShare?.({ files: [file] })) {
-        await navigator.share({
-          title: '牛马测试',
-          text: `我是【${type.code} · ${type.name}】`,
-          files: [file],
-        });
-      } else {
-        // 降级：下载图片
+      // 复制图片到剪贴板
+      await navigator.clipboard.write([
+        new ClipboardItem({ 'image/png': blob }),
+      ]);
+      setShareTip('已复制到剪贴板');
+      setTimeout(() => setShareTip(''), 2000);
+    } catch {
+      // 剪贴板不支持时降级为下载
+      try {
+        const svgEl = avatarRef.current?.querySelector('svg') as SVGSVGElement | null;
+        const blob = await generateShareImage(type, svgEl);
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
         a.download = `niumati-${type.code}.png`;
         a.click();
         URL.revokeObjectURL(url);
+        setShareTip('已下载图片');
+        setTimeout(() => setShareTip(''), 2000);
+      } catch {
+        // ignore
       }
-    } catch {
-      // 用户取消分享，忽略
     } finally {
       setSharing(false);
     }
@@ -245,7 +250,7 @@ function Result({ type, onReset }: { type: Niuma; onReset: () => void }) {
           disabled={sharing}
           className="flex-1 px-6 py-3 bg-white text-black hover:bg-neutral-200 rounded-full font-semibold transition disabled:opacity-50"
         >
-          {sharing ? '生成中...' : '分享结果'}
+          {sharing ? '生成中...' : shareTip || '分享结果'}
         </button>
       </div>
     </main>
