@@ -300,19 +300,22 @@ function Result({ type, onReset }: { type: Niuma; onReset: () => void }) {
 
   return (
     <main className="min-h-screen flex flex-col px-6 py-12 max-w-2xl mx-auto">
-      <div className="flex items-center gap-6 mb-10">
+      <div className="flex items-center gap-4 mb-10">
         <div className="shrink-0" ref={avatarRef}>
-          <Avatar code={type.code} size={120} />
+          <Avatar code={type.code} size={100} />
         </div>
-        <div>
+        <div className="flex-1 min-w-0">
           <p className="text-xs text-neutral-500 mb-1 tracking-widest uppercase">
             你的牛马类型
           </p>
-          <div className="font-mono text-4xl md:text-5xl font-bold tracking-wider mb-2">
+          <div className="font-mono text-3xl md:text-4xl font-bold tracking-wider mb-1">
             {type.code}
           </div>
-          <h1 className="text-2xl md:text-3xl font-bold mb-2">{type.name}</h1>
-          <p className="text-neutral-400 italic text-sm">「{type.tagline}」</p>
+          <h1 className="text-xl md:text-2xl font-bold mb-1">{type.name}</h1>
+          <p className="text-neutral-400 italic text-sm truncate">「{type.tagline}」</p>
+        </div>
+        <div className="shrink-0">
+          <QRCodeBlock size={80} />
         </div>
       </div>
 
@@ -325,10 +328,6 @@ function Result({ type, onReset }: { type: Niuma; onReset: () => void }) {
           「{quote.text}」
         </p>
         <p className="text-neutral-600 text-xs">—— {quote.author}</p>
-      </div>
-
-      <div className="flex justify-center mb-10">
-        <QRCodeBlock size={120} />
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3">
