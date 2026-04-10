@@ -251,8 +251,8 @@ function Result({ type, onReset }: { type: Niuma; onReset: () => void }) {
     setSharing(true);
     try {
       const svgEl = avatarRef.current?.querySelector('svg') as SVGSVGElement | null;
-      const blob = await generateShareImage(type, svgEl);
-      const file = new File([blob], `niumati-${type.code}.png`, { type: 'image/png' });
+      const blob = await generateShareImage(type, svgEl, quote);
+      const file = new File([blob], `niumati-${type.code}.jpg`, { type: 'image/jpeg' });
 
       // 优先使用系统分享（手机端）
       if (navigator.share && navigator.canShare?.({ files: [file] })) {
@@ -266,9 +266,26 @@ function Result({ type, onReset }: { type: Niuma; onReset: () => void }) {
         return;
       }
 
-      // 桌面端：复制到剪贴板
+      // 桌面端：复制到剪贴板（剪贴板需要PNG格式）
+      // 将JPEG转为PNG用于剪贴板
+      const pngCanvas = document.createElement('canvas');
+      const img = new Image();
+      const blobUrl = URL.createObjectURL(blob);
+      await new Promise<void>((resolve) => {
+        img.onload = () => {
+          pngCanvas.width = img.width;
+          pngCanvas.height = img.height;
+          pngCanvas.getContext('2d')!.drawImage(img, 0, 0);
+          URL.revokeObjectURL(blobUrl);
+          resolve();
+        };
+        img.src = blobUrl;
+      });
+      const pngBlob = await new Promise<Blob>((resolve) => {
+        pngCanvas.toBlob((b) => resolve(b!), 'image/png');
+      });
       await navigator.clipboard.write([
-        new ClipboardItem({ 'image/png': blob }),
+        new ClipboardItem({ 'image/png': pngBlob }),
       ]);
       setShareTip('已复制到剪贴板');
       setTimeout(() => setShareTip(''), 2000);
@@ -281,11 +298,11 @@ function Result({ type, onReset }: { type: Niuma; onReset: () => void }) {
       // 降级为下载
       try {
         const svgEl = avatarRef.current?.querySelector('svg') as SVGSVGElement | null;
-        const blob = await generateShareImage(type, svgEl);
+        const blob = await generateShareImage(type, svgEl, quote);
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `niumati-${type.code}.png`;
+        a.download = `niumati-${type.code}.jpg`;
         a.click();
         URL.revokeObjectURL(url);
         setShareTip('已下载图片');

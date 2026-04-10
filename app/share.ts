@@ -13,7 +13,8 @@ const H = 1334;
 
 export async function generateShareImage(
   type: Niuma,
-  avatarSvgElement: SVGSVGElement | null
+  avatarSvgElement: SVGSVGElement | null,
+  quote?: { text: string; author: string }
 ): Promise<Blob> {
   const canvas = document.createElement('canvas');
   canvas.width = W;
@@ -117,15 +118,45 @@ export async function generateShareImage(
     y += 44;
   }
 
+  // ── 名人名言 ──────────────────────────────────────────
+  if (quote) {
+    y += 20;
+    // 名言背景框
+    const boxPadding = 30;
+    const quoteText = `「${quote.text}」`;
+    ctx.font = '24px "PingFang SC", "Microsoft YaHei", sans-serif';
+    const quoteLines = wrapText(ctx, quoteText, W - 140 - boxPadding * 2);
+    const boxH = quoteLines.length * 38 + 40 + boxPadding * 2;
+
+    ctx.fillStyle = 'rgba(255,255,255,0.05)';
+    ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+    ctx.lineWidth = 1;
+    const boxX = 70;
+    const boxW = W - 140;
+    roundRect(ctx, boxX, y, boxW, boxH, 16);
+
+    ctx.textAlign = 'center';
+    ctx.font = 'italic 24px "PingFang SC", "Microsoft YaHei", sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    let qy = y + boxPadding + 28;
+    for (const line of quoteLines) {
+      ctx.fillText(line, W / 2, qy);
+      qy += 38;
+    }
+    ctx.font = '20px "PingFang SC", "Microsoft YaHei", sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.fillText(`—— ${quote.author}`, W / 2, qy + 10);
+  }
+
   // ── 底部品牌 ──────────────────────────────────────────
   ctx.textAlign = 'center';
   ctx.font = 'bold 24px "PingFang SC", "Microsoft YaHei", sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,0.2)';
   ctx.fillText('🐂 码农牛马测试', W / 2, H - 40);
 
-  // ── 导出 ──────────────────────────────────────────────
+  // ── 导出 JPEG ─────────────────────────────────────────
   return new Promise((resolve) => {
-    canvas.toBlob((blob) => resolve(blob!), 'image/png');
+    canvas.toBlob((blob) => resolve(blob!), 'image/jpeg', 0.92);
   });
 }
 
@@ -136,6 +167,22 @@ function loadImage(src: string): Promise<HTMLImageElement> {
     img.onerror = reject;
     img.src = src;
   });
+}
+
+function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
 }
 
 function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
