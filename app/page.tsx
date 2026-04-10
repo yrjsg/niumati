@@ -32,16 +32,16 @@ function sampleQuestions(): Question[] {
     const shuffled = [...group].sort(() => Math.random() - 0.5);
     picked.push(...shuffled.slice(0, 4));
   }
-  // 打乱每题的选项顺序（避免 null 总是 C）
+  // 打乱每题的选项顺序
   return picked.map(q => ({
     ...q,
-    choices: ([...q.choices].sort(() => Math.random() - 0.5) as [typeof q.choices[0], typeof q.choices[1], typeof q.choices[2]]),
+    choices: (Math.random() > 0.5 ? [q.choices[0], q.choices[1]] : [q.choices[1], q.choices[0]]) as [typeof q.choices[0], typeof q.choices[1]],
   }));
 }
 
 export default function Home() {
   const [stage, setStage] = useState<Stage>('intro');
-  const [answers, setAnswers] = useState<(Axis | null)[]>([]);
+  const [answers, setAnswers] = useState<Axis[]>([]);
   const [idx, setIdx] = useState(0);
   const [quiz, setQuiz] = useState<Question[]>([]);
 
@@ -59,7 +59,7 @@ export default function Home() {
     setQuiz(sampleQuestions());
   };
 
-  const answer = (value: Axis | null) => {
+  const answer = (value: Axis) => {
     const next = [...answers, value];
     setAnswers(next);
     if (next.length === quiz.length) {
@@ -168,7 +168,7 @@ function Quiz({
   q: Question;
   idx: number;
   total: number;
-  onAnswer: (v: Axis | null) => void;
+  onAnswer: (v: Axis) => void;
 }) {
   const progress = (idx / total) * 100;
 

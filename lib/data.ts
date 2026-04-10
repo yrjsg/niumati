@@ -1,5 +1,5 @@
 // 牛马 TI · 数据文件
-// 4 个维度 × 16 种类型 × 32 道题 × 每题 3 选项
+// 4 个维度 × 16 种类型 × 32 道题 × 每题 2 选项
 
 export type Axis =
   | 'J' | 'M'  // 卷度: 卷王 / 摸鱼
@@ -218,12 +218,12 @@ export const niumaTypes: Niuma[] = [
 // 32 道题 · 每维度 8 题 · 每题 3 个选项（两极 + 中间/梗）
 // ============================================================
 
-export type Choice = { text: string; value: Axis | null };
+export type Choice = { text: string; value: Axis };
 
 export type Question = {
   id: number;
   scenario: string;
-  choices: [Choice, Choice, Choice];
+  choices: [Choice, Choice];
 };
 
 export const questions: Question[] = [
@@ -235,7 +235,6 @@ export const questions: Question[] = [
     choices: [
       { text: '秒回"收到！"，默默取消露营，周六抱着睡袋去了公司', value: 'J' },
       { text: '"周一早上再看呗"，准时关机，露营去咯～🏕️', value: 'M' },
-      { text: '去露营了，但帐篷里开着电脑VPN，蚊子和bug一起拍', value: null },
     ],
   },
   {
@@ -244,7 +243,6 @@ export const questions: Question[] = [
     choices: [
       { text: '认真读完，写了800字读后感发群里，还@了老板', value: 'J' },
       { text: '点开，看了三秒，关掉，打开外卖APP 🍔', value: 'M' },
-      { text: '截图转发到吐槽群，配文"第八个习惯：学会忍受老板的鸡汤"', value: null },
     ],
   },
   {
@@ -253,7 +251,6 @@ export const questions: Question[] = [
     choices: [
       { text: '熬了两个通宵默默重写了，组会上低调演示，内心狂喜', value: 'J' },
       { text: '又不是不能用，多点两下鼠标的事，何必给自己加戏', value: 'M' },
-      { text: '写了篇万字吐槽发内网，标题《论一个工具如何逼疯一个程序员》', value: null },
     ],
   },
   {
@@ -262,7 +259,6 @@ export const questions: Question[] = [
     choices: [
       { text: '叹了口气放下遥控器，截屏分析发了条长消息，还画了个流程图', value: 'J' },
       { text: '瞄了一眼，"又不是我的锅"，继续追剧，啧这集好看 📺', value: 'M' },
-      { text: '发了句"明天再说吧兄弟们，今晚的剧不等人"然后手动静音', value: null },
     ],
   },
   {
@@ -271,7 +267,6 @@ export const questions: Question[] = [
     choices: [
       { text: '图文并茂写了2000字，分1/2/3点，附上数据截图和思考总结', value: 'J' },
       { text: '"本周：改bug。下周：继续改。风险：无。"三行，发送，收工 ✌️', value: 'M' },
-      { text: '把上周的周报复制过来改个日期，心想反正也没人看', value: null },
     ],
   },
   {
@@ -280,7 +275,6 @@ export const questions: Question[] = [
     choices: [
       { text: '第一天就报名了，还做了思维导图笔记，发到学习群里', value: 'J' },
       { text: '收藏了链接，和外卖优惠券躺在一起，此生再也没打开', value: 'M' },
-      { text: '等同事看完了问他"值不值得看"，得到"一般"后安心了', value: null },
     ],
   },
   {
@@ -289,7 +283,6 @@ export const questions: Question[] = [
     choices: [
       { text: '不走！干完再说！戴上耳机进入心流状态 🎧', value: 'J' },
       { text: '准点关电脑走人，明天的事情明天再说，人生苦短 🚶', value: 'M' },
-      { text: '电脑不关，外套搭椅子上，人已经在电梯里了', value: null },
     ],
   },
   {
@@ -298,7 +291,6 @@ export const questions: Question[] = [
     choices: [
       { text: '深吸一口气，"有挑战！安排！"，打开IDE就开始干', value: 'J' },
       { text: '"能砍不？能延期不？能换人不？"，灵魂三连问 🤺', value: 'M' },
-      { text: '微笑回复"收到"，然后把消息标记为未读，假装自己不存在', value: null },
     ],
   },
 
@@ -310,7 +302,6 @@ export const questions: Question[] = [
     choices: [
       { text: '从床上弹起来修好了，群里淡定说"已修复"——绝口不提是谁的锅', value: 'B' },
       { text: '"明天再看吧，又不是核心服务"，把告警通知静音，翻身继续睡 😴', value: 'S' },
-      { text: '盯着手机屏幕纠结了十分钟，最后发了句"我看看"然后倒头就睡', value: null },
     ],
   },
   {
@@ -319,7 +310,6 @@ export const questions: Question[] = [
     choices: [
       { text: '深吸一口气站起来："我来说，确实有几个地方我做得不够"', value: 'B' },
       { text: '淡定打开PPT，列出每个环节的问题——反正不全是你，数据会说话 📊', value: 'S' },
-      { text: '端起水杯猛喝一口，眼神飘向窗外，祈祷老板跳过自己', value: null },
     ],
   },
   {
@@ -328,7 +318,6 @@ export const questions: Question[] = [
     choices: [
       { text: '"是我没把好关，流程有漏洞，我先修，回头加上卡点"', value: 'B' },
       { text: '"实习生同学不太熟悉流程，我后续加强review"——不背锅但也不太狠', value: 'S' },
-      { text: '"建议全组复盘一下CI/CD流程"——把锅升华成组织问题，谁也不怪 🧘', value: null },
     ],
   },
   {
@@ -337,7 +326,6 @@ export const questions: Question[] = [
     choices: [
       { text: '先写自己的问题："我文档描述不够清晰，后续补充"', value: 'B' },
       { text: '报告重点写"双方需加强对齐"——暗示是对方没看仔细 🎯', value: 'S' },
-      { text: '报告里只写"建议引入自动化校验"，巧妙地谁的锅都没提', value: null },
     ],
   },
   {
@@ -346,7 +334,6 @@ export const questions: Question[] = [
     choices: [
       { text: '坦然一笑："是我改的，有问题我来看，发我链接"', value: 'B' },
       { text: '"我就改了一行注释，核心逻辑是原来就那样的" 🙄', value: 'S' },
-      { text: '假装没听到，低头疯狂敲键盘，键盘声比心跳还响', value: null },
     ],
   },
   {
@@ -355,7 +342,6 @@ export const questions: Question[] = [
     choices: [
       { text: '"行，我来吧……"——脸上微笑，心在滴血 🥲', value: 'B' },
       { text: '"我手上排满了，要不问问小王？他最近好像不太忙"', value: 'S' },
-      { text: '"可以接，但我需要两个HC和一台新服务器"——先把条件谈好再说', value: null },
     ],
   },
   {
@@ -364,7 +350,6 @@ export const questions: Question[] = [
     choices: [
       { text: '"我当时应该多确认一下，先修了，下次我会拉个对齐会"', value: 'B' },
       { text: '截图需求文档，@产品："亲，您这块描述……您自己看看？" 📸', value: 'S' },
-      { text: '默默修了bug，然后在群里发需求文档截图，一句话不说，让大家自行体会', value: null },
     ],
   },
   {
@@ -373,7 +358,6 @@ export const questions: Question[] = [
     choices: [
       { text: '立刻帮他一起恢复环境，私下教他怎么避免，"别紧张，我当年也干过"', value: 'B' },
       { text: '群里@新人说"新同学的环境问题，我帮看看"——让老板知道是谁就行', value: 'S' },
-      { text: '发了个表情包"欢迎来到地狱🔥"，然后继续喝咖啡', value: null },
     ],
   },
 
@@ -385,7 +369,6 @@ export const questions: Question[] = [
     choices: [
       { text: '"行吧，代码先留着，正好给自己放个假"，下楼买了杯奶茶 🧋', value: 'L' },
       { text: '回工位愣了半小时，整个人像被抽空了，晚上打开了Boss直聘 💀', value: 'P' },
-      { text: '把代码打包传到自己GitHub，README写上"此项目被公司杀害，特此纪念"', value: null },
     ],
   },
   {
@@ -394,7 +377,6 @@ export const questions: Question[] = [
     choices: [
       { text: '"好的！我再优化一版"——虽然心里苦，但还是笑着继续 😊', value: 'L' },
       { text: '回到工位把方案文档关了，盯着屏幕发呆十分钟，觉得自己好废 😩', value: 'P' },
-      { text: '把方案发到朋友圈，配文"看看这个被毙掉的天才之作"', value: null },
     ],
   },
   {
@@ -403,7 +385,6 @@ export const questions: Question[] = [
     choices: [
       { text: '深呼吸三秒，"行，重写也不是第一次了，来吧"，打开IDE 💪', value: 'L' },
       { text: '"又改？？？你们产品能不能想清楚再来？？"脸直接黑了 😡', value: 'P' },
-      { text: '"改可以，请先请我喝杯瑞幸，大杯的，加双份浓缩"', value: null },
     ],
   },
   {
@@ -412,7 +393,6 @@ export const questions: Question[] = [
     choices: [
       { text: '"确实有问题，感谢指出！我改一下"——真心不觉得丢脸', value: 'L' },
       { text: '脸一阵红一阵白，虽然知道他说得对，但就是一整天都不舒服 😤', value: 'P' },
-      { text: '回复"好的收到"，然后偷偷删了git blame免得以后被人翻记录', value: null },
     ],
   },
   {
@@ -421,7 +401,6 @@ export const questions: Question[] = [
     choices: [
       { text: '微微一笑，"收到老板，我调整一下"——会后下楼抽根烟，回来继续干', value: 'L' },
       { text: '当场没说话，但进了厕所20分钟出不来，晚上翻来覆去失眠到凌晨 😢', value: 'P' },
-      { text: '当场面不改色说"谢谢老板关心"，内心已经在写离职信了', value: null },
     ],
   },
   {
@@ -430,7 +409,6 @@ export const questions: Question[] = [
     choices: [
       { text: '"清净！没人打扰效率更高！"，泡杯咖啡开始干活 ☕', value: 'L' },
       { text: '拍了张空荡荡的工位发朋友圈，配文"人间不值得"，然后坐那发呆 🥀', value: 'P' },
-      { text: '既然没人监督，打开B站看完了三集番剧，心安理得', value: null },
     ],
   },
   {
@@ -439,7 +417,6 @@ export const questions: Question[] = [
     choices: [
       { text: '逐条看完，"嗯确实有道理"，愉快地改了，还回了句"感谢review！"', value: 'L' },
       { text: '血压飙到180，想回怼但忍住了，一整天都在想"他凭什么？" 🤬', value: 'P' },
-      { text: '回复"已阅，感谢"，然后一条都没改，等他自己忘了', value: null },
     ],
   },
   {
@@ -448,7 +425,6 @@ export const questions: Question[] = [
     choices: [
       { text: '"挺好玩的！难得出去活动一下！"，提前买了登山杖 🥾', value: 'L' },
       { text: '光是想到就累了，提前三天开始焦虑，当天早上肚子真的疼了 🤕', value: 'P' },
-      { text: '请假说"家里有事"，实际上在家打了一天游戏，神清气爽', value: null },
     ],
   },
 
@@ -460,7 +436,6 @@ export const questions: Question[] = [
     choices: [
       { text: '私下跟兄弟们说"别太拼，身体要紧"，周会上提出"可以分阶段交付"', value: 'X' },
       { text: '群里第一个回复"收到！我来排计划！"，配了个加油emoji 💪', value: 'Z' },
-      { text: '不说话，到点就下班，用行动投票，反正又不敢扣我工资', value: null },
     ],
   },
   {
@@ -469,7 +444,6 @@ export const questions: Question[] = [
     choices: [
       { text: '"小李有原因的，可以给他点时间"——兄弟有难，必须说话 🤝', value: 'X' },
       { text: '客观列了一下数据，没提小李的私事——公事公办，不掺杂感情', value: 'Z' },
-      { text: '"老板我觉得大家都挺好的……"——笑着把话题岔开，谁也不得罪', value: null },
     ],
   },
   {
@@ -478,7 +452,6 @@ export const questions: Question[] = [
     choices: [
       { text: '"他不应该被裁！我可以分一些活给他！"——义气就完事了 💥', value: 'X' },
       { text: '"这个还是您判断吧，我服从公司安排"——识时务为俊杰', value: 'Z' },
-      { text: '偷偷给兄弟发消息"赶紧投简历"，明面上装作什么都不知道', value: null },
     ],
   },
   {
@@ -487,7 +460,6 @@ export const questions: Question[] = [
     choices: [
       { text: '第一个开口："弹性办公可能更适合我们，数据也证明了效率没问题" 🙋', value: 'X' },
       { text: '"可以试试！"——先配合老板，别当出头鸟', value: 'Z' },
-      { text: '不说话，从此每天踩着打卡线到，一分钟不多一分钟不少，精准得像原子钟', value: null },
     ],
   },
   {
@@ -496,7 +468,6 @@ export const questions: Question[] = [
     choices: [
       { text: '截图转发到吐槽群，配文"家人们谁懂啊，资本家开始打感情牌了" 🤮', value: 'X' },
       { text: '秒回"+1！老板说得太对了！我们一起加油！"，还加了三个爱心', value: 'Z' },
-      { text: '假装没看到，等第二天别人都回了再跟一个"👍"', value: null },
     ],
   },
   {
@@ -505,7 +476,6 @@ export const questions: Question[] = [
     choices: [
       { text: '直奔兄弟那桌！"今天食堂的红烧肉不错"，边吃边吐槽需求 🍖', value: 'X' },
       { text: '坐到老板旁边，"老板今天菜色不错啊"，顺便聊聊最近的项目想法', value: 'Z' },
-      { text: '戴上耳机找个角落一个人吃，今天谁也不想搭理，社恐发作了', value: null },
     ],
   },
   {
@@ -514,7 +484,6 @@ export const questions: Question[] = [
     choices: [
       { text: '跟着打了一大段，"说得好！早就想说了！"，还补充了三个论据 👊', value: 'X' },
       { text: '看完默默退出聊天界面，心想"这群太危险了，截图怎么办" 🫣', value: 'Z' },
-      { text: '退出群聊——保命要紧，万一被老板发现呢', value: null },
     ],
   },
   {
@@ -523,7 +492,6 @@ export const questions: Question[] = [
     choices: [
       { text: '你第一个举手，把憋了半年的想法全倒出来，兄弟们在旁边疯狂点头', value: 'X' },
       { text: '"我觉得现在挺好的！leader方向很清晰！"——先混个脸熟 😇', value: 'Z' },
-      { text: '低头假装记笔记，心想"谁先说谁先死"', value: null },
     ],
   },
 ];
@@ -532,12 +500,12 @@ export const questions: Question[] = [
 // 结果计算
 // ============================================================
 
-export function computeResult(answers: (Axis | null)[]): string {
+export function computeResult(answers: Axis[]): string {
   const count: Record<Axis, number> = {
     J: 0, M: 0, B: 0, S: 0, L: 0, P: 0, X: 0, Z: 0,
   };
   for (const a of answers) {
-    if (a !== null) count[a]++;
+    count[a]++;
   }
   // 平局时随机打破，避免固定偏向某个类型
   const pick = (a: Axis, b: Axis) =>
