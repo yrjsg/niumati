@@ -297,7 +297,7 @@ function Result({ type, onReset }: { type: Niuma; onReset: () => void }) {
 
   return (
     <main className="min-h-screen flex flex-col px-6 py-12 max-w-2xl mx-auto">
-      <div className="flex items-center gap-4 mb-10">
+      <div className="flex items-center gap-4 mb-6">
         <div className="shrink-0" ref={avatarRef}>
           <Avatar code={type.code} size={100} />
         </div>
@@ -309,10 +309,7 @@ function Result({ type, onReset }: { type: Niuma; onReset: () => void }) {
             {type.code}
           </div>
           <h1 className="text-xl md:text-2xl font-bold mb-1">{type.name}</h1>
-          <p className="text-neutral-400 italic text-sm truncate">「{type.tagline}」</p>
-        </div>
-        <div className="shrink-0">
-          <QRCodeBlock size={80} />
+          <p className="text-neutral-400 italic text-sm">「{type.tagline}」</p>
         </div>
       </div>
 
@@ -320,11 +317,15 @@ function Result({ type, onReset }: { type: Niuma; onReset: () => void }) {
         {type.description}
       </p>
 
-      <div className="bg-neutral-900/50 border border-neutral-800 rounded-xl p-6 mb-10 text-center">
+      <div className="bg-neutral-900/50 border border-neutral-800 rounded-xl p-6 mb-6 text-center">
         <p className="text-neutral-300 italic text-base leading-relaxed mb-2">
           「{quote.text}」
         </p>
         <p className="text-neutral-600 text-xs">—— {quote.author}</p>
+      </div>
+
+      <div className="flex justify-center mb-10">
+        <QRCodeBlock size={120} />
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3">

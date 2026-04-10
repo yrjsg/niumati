@@ -41,10 +41,9 @@ export async function generateShareImage(
   ctx.lineTo(W - 60, H - 80);
   ctx.stroke();
 
-  // ── 头部：头像(左) + 类型信息(中) + 二维码(右) ─────────
+  // ── 头部：头像(左) + 类型信息(右) ─────────────────────
   const headerY = 130;
-  const avatarSize = 160;
-  const qrSize = 100;
+  const avatarSize = 180;
 
   // 头像 - 左侧
   if (avatarSvgElement) {
@@ -69,46 +68,28 @@ export async function generateShareImage(
     ctx.fillText(type.emoji, 80, headerY + avatarSize * 0.7);
   }
 
-  // 类型信息 - 中间
-  const infoX = 60 + avatarSize + 24;
+  // 类型信息 - 右侧（有更多横向空间）
+  const infoX = 60 + avatarSize + 30;
   ctx.textAlign = 'left';
 
   ctx.font = '20px sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,0.4)';
-  ctx.fillText('你的牛马类型', infoX, headerY + 28);
+  ctx.fillText('你的牛马类型', infoX, headerY + 32);
 
   ctx.font = 'bold 56px ui-monospace, SFMono-Regular, monospace';
   ctx.fillStyle = '#ffffff';
-  ctx.fillText(type.code, infoX, headerY + 85);
+  ctx.fillText(type.code, infoX, headerY + 90);
 
-  ctx.font = 'bold 36px "PingFang SC", "Microsoft YaHei", sans-serif';
+  ctx.font = 'bold 40px "PingFang SC", "Microsoft YaHei", sans-serif';
   ctx.fillStyle = '#ffffff';
-  ctx.fillText(type.name, infoX, headerY + 130);
+  ctx.fillText(type.name, infoX, headerY + 140);
 
-  ctx.font = '22px "PingFang SC", "Microsoft YaHei", sans-serif';
+  ctx.font = '24px "PingFang SC", "Microsoft YaHei", sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,0.5)';
-  ctx.fillText(`「${type.tagline}」`, infoX, headerY + 162);
-
-  // 二维码 - 右侧
-  try {
-    const qrDataUrl = await QRCode.toDataURL(SITE_URL, {
-      width: qrSize,
-      margin: 1,
-      color: { dark: '#ffffff', light: '#00000000' },
-    });
-    const qrImg = await loadImage(qrDataUrl);
-    ctx.drawImage(qrImg, W - 60 - qrSize, headerY + 20, qrSize, qrSize);
-
-    ctx.textAlign = 'center';
-    ctx.font = '16px "PingFang SC", "Microsoft YaHei", sans-serif';
-    ctx.fillStyle = 'rgba(255,255,255,0.3)';
-    ctx.fillText('扫码测试', W - 60 - qrSize / 2, headerY + 20 + qrSize + 20);
-  } catch {
-    // QR 生成失败时跳过
-  }
+  ctx.fillText(`「${type.tagline}」`, infoX, headerY + 175);
 
   // ── 描述 ──────────────────────────────────────────────
-  let y = headerY + avatarSize + 60;
+  let y = headerY + avatarSize + 50;
   ctx.font = '28px "PingFang SC", "Microsoft YaHei", sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,0.75)';
   ctx.textAlign = 'left';
@@ -121,7 +102,6 @@ export async function generateShareImage(
   // ── 名人名言 ──────────────────────────────────────────
   if (quote) {
     y += 20;
-    // 名言背景框
     const boxPadding = 30;
     const quoteText = `「${quote.text}」`;
     ctx.font = '24px "PingFang SC", "Microsoft YaHei", sans-serif';
@@ -146,6 +126,27 @@ export async function generateShareImage(
     ctx.font = '20px "PingFang SC", "Microsoft YaHei", sans-serif';
     ctx.fillStyle = 'rgba(255,255,255,0.3)';
     ctx.fillText(`—— ${quote.author}`, W / 2, qy + 10);
+    y = qy + 30;
+  }
+
+  // ── 二维码（名人名言下方，居中） ─────────────────────────
+  const qrSize = 140;
+  const qrY = y + 20;
+  try {
+    const qrDataUrl = await QRCode.toDataURL(SITE_URL, {
+      width: qrSize,
+      margin: 1,
+      color: { dark: '#ffffff', light: '#00000000' },
+    });
+    const qrImg = await loadImage(qrDataUrl);
+    ctx.drawImage(qrImg, (W - qrSize) / 2, qrY, qrSize, qrSize);
+
+    ctx.textAlign = 'center';
+    ctx.font = '18px "PingFang SC", "Microsoft YaHei", sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.fillText('扫码来测测你是哪种牛马', W / 2, qrY + qrSize + 24);
+  } catch {
+    // QR 生成失败时跳过
   }
 
   // ── 底部品牌 ──────────────────────────────────────────
