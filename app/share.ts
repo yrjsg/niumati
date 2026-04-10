@@ -21,7 +21,6 @@ export async function generateShareImage(
   const ctx = canvas.getContext('2d')!;
 
   // ── 背景 ──────────────────────────────────────────────
-  // 渐变深色背景
   const grad = ctx.createLinearGradient(0, 0, 0, H);
   grad.addColorStop(0, '#0a0a0a');
   grad.addColorStop(0.6, '#111118');
@@ -33,18 +32,20 @@ export async function generateShareImage(
   ctx.strokeStyle = 'rgba(255,255,255,0.06)';
   ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.moveTo(60, 100);
-  ctx.lineTo(W - 60, 100);
+  ctx.moveTo(60, 80);
+  ctx.lineTo(W - 60, 80);
   ctx.stroke();
   ctx.beginPath();
-  ctx.moveTo(60, H - 100);
-  ctx.lineTo(W - 60, H - 100);
+  ctx.moveTo(60, H - 80);
+  ctx.lineTo(W - 60, H - 80);
   ctx.stroke();
 
-  // ── 头像 ──────────────────────────────────────────────
-  let avatarY = 180;
-  const avatarSize = 240;
+  // ── 头部：头像(左) + 类型信息(中) + 二维码(右) ─────────
+  const headerY = 130;
+  const avatarSize = 160;
+  const qrSize = 100;
 
+  // 头像 - 左侧
   if (avatarSvgElement) {
     try {
       const svgClone = avatarSvgElement.cloneNode(true) as SVGSVGElement;
@@ -53,87 +54,41 @@ export async function generateShareImage(
       const svgString = new XMLSerializer().serializeToString(svgClone);
       const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
       const url = URL.createObjectURL(svgBlob);
-
       const img = await loadImage(url);
-      ctx.drawImage(img, (W - avatarSize) / 2, avatarY, avatarSize, avatarSize);
+      ctx.drawImage(img, 60, headerY, avatarSize, avatarSize);
       URL.revokeObjectURL(url);
     } catch {
-      // fallback: 画 emoji
-      ctx.font = '120px serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(type.emoji, W / 2, avatarY + avatarSize * 0.7);
+      ctx.font = '80px serif';
+      ctx.textAlign = 'left';
+      ctx.fillText(type.emoji, 80, headerY + avatarSize * 0.7);
     }
   } else {
-    ctx.font = '120px serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(type.emoji, W / 2, avatarY + avatarSize * 0.7);
+    ctx.font = '80px serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(type.emoji, 80, headerY + avatarSize * 0.7);
   }
 
-  // ── 标签 ──────────────────────────────────────────────
-  let y = avatarY + avatarSize + 50;
-  ctx.textAlign = 'center';
-
-  // "你的牛马类型"
-  ctx.font = '24px sans-serif';
-  ctx.fillStyle = 'rgba(255,255,255,0.4)';
-  ctx.fillText('你的牛马类型', W / 2, y);
-  y += 60;
-
-  // 代号
-  ctx.font = 'bold 80px ui-monospace, SFMono-Regular, monospace';
-  ctx.fillStyle = '#ffffff';
-  ctx.fillText(type.code, W / 2, y);
-  y += 60;
-
-  // 名字
-  ctx.font = 'bold 52px "PingFang SC", "Microsoft YaHei", sans-serif';
-  ctx.fillStyle = '#ffffff';
-  ctx.fillText(type.name, W / 2, y);
-  y += 50;
-
-  // tagline
-  ctx.font = 'italic 28px "PingFang SC", "Microsoft YaHei", sans-serif';
-  ctx.fillStyle = 'rgba(255,255,255,0.5)';
-  ctx.fillText(`「${type.tagline}」`, W / 2, y);
-  y += 70;
-
-  // ── 描述 ──────────────────────────────────────────────
-  ctx.font = '26px "PingFang SC", "Microsoft YaHei", sans-serif';
-  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  // 类型信息 - 中间
+  const infoX = 60 + avatarSize + 24;
   ctx.textAlign = 'left';
-  const descLines = wrapText(ctx, type.description, W - 140);
-  for (const line of descLines) {
-    ctx.fillText(line, 70, y);
-    y += 40;
-  }
-  y += 30;
 
-  // ── 技能 & 口头禅 ─────────────────────────────────────
-  ctx.fillStyle = 'rgba(255,255,255,0.3)';
+  ctx.font = '20px sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,0.4)';
+  ctx.fillText('你的牛马类型', infoX, headerY + 28);
+
+  ctx.font = 'bold 56px ui-monospace, SFMono-Regular, monospace';
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText(type.code, infoX, headerY + 85);
+
+  ctx.font = 'bold 36px "PingFang SC", "Microsoft YaHei", sans-serif';
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText(type.name, infoX, headerY + 130);
+
   ctx.font = '22px "PingFang SC", "Microsoft YaHei", sans-serif';
-  ctx.fillText('本命技能', 70, y);
-  y += 32;
-  ctx.fillStyle = 'rgba(255,255,255,0.7)';
-  ctx.font = '26px "PingFang SC", "Microsoft YaHei", sans-serif';
-  ctx.fillText(type.skill, 70, y);
-  y += 50;
+  ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  ctx.fillText(`「${type.tagline}」`, infoX, headerY + 162);
 
-  ctx.fillStyle = 'rgba(255,255,255,0.3)';
-  ctx.font = '22px "PingFang SC", "Microsoft YaHei", sans-serif';
-  ctx.fillText('口头禅', 70, y);
-  y += 32;
-  ctx.fillStyle = 'rgba(255,255,255,0.7)';
-  ctx.font = '26px "PingFang SC", "Microsoft YaHei", sans-serif';
-  const quotesStr = type.quotes.map(q => `"${q}"`).join('  ·  ');
-  const quoteLines = wrapText(ctx, quotesStr, W - 140);
-  for (const line of quoteLines) {
-    ctx.fillText(line, 70, y);
-    y += 38;
-  }
-
-  // ── 底部：二维码 + 品牌 ────────────────────────────────
-  const qrSize = 140;
-  const qrY = H - 100 - qrSize;
+  // 二维码 - 右侧
   try {
     const qrDataUrl = await QRCode.toDataURL(SITE_URL, {
       width: qrSize,
@@ -141,15 +96,32 @@ export async function generateShareImage(
       color: { dark: '#ffffff', light: '#00000000' },
     });
     const qrImg = await loadImage(qrDataUrl);
-    ctx.drawImage(qrImg, (W - qrSize) / 2, qrY, qrSize, qrSize);
+    ctx.drawImage(qrImg, W - 60 - qrSize, headerY + 20, qrSize, qrSize);
+
+    ctx.textAlign = 'center';
+    ctx.font = '16px "PingFang SC", "Microsoft YaHei", sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.fillText('扫码测试', W - 60 - qrSize / 2, headerY + 20 + qrSize + 20);
   } catch {
     // QR 生成失败时跳过
   }
 
+  // ── 描述 ──────────────────────────────────────────────
+  let y = headerY + avatarSize + 60;
+  ctx.font = '28px "PingFang SC", "Microsoft YaHei", sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,0.75)';
+  ctx.textAlign = 'left';
+  const descLines = wrapText(ctx, type.description, W - 140);
+  for (const line of descLines) {
+    ctx.fillText(line, 70, y);
+    y += 44;
+  }
+
+  // ── 底部品牌 ──────────────────────────────────────────
   ctx.textAlign = 'center';
-  ctx.font = '20px "PingFang SC", "Microsoft YaHei", sans-serif';
-  ctx.fillStyle = 'rgba(255,255,255,0.35)';
-  ctx.fillText('扫码来测测你是哪种牛马 🐂', W / 2, qrY + qrSize + 30);
+  ctx.font = 'bold 24px "PingFang SC", "Microsoft YaHei", sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,0.2)';
+  ctx.fillText('🐂 码农牛马测试', W / 2, H - 40);
 
   // ── 导出 ──────────────────────────────────────────────
   return new Promise((resolve) => {

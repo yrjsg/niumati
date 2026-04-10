@@ -252,15 +252,33 @@ function Result({ type, onReset }: { type: Niuma; onReset: () => void }) {
     try {
       const svgEl = avatarRef.current?.querySelector('svg') as SVGSVGElement | null;
       const blob = await generateShareImage(type, svgEl);
+      const file = new File([blob], `niumati-${type.code}.png`, { type: 'image/png' });
 
-      // 复制图片到剪贴板
+      // 优先使用系统分享（手机端）
+      if (navigator.share && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({
+          title: `我是${type.name}（${type.code}）`,
+          text: `「${type.tagline}」—— 码农牛马测试`,
+          files: [file],
+        });
+        setShareTip('分享成功');
+        setTimeout(() => setShareTip(''), 2000);
+        return;
+      }
+
+      // 桌面端：复制到剪贴板
       await navigator.clipboard.write([
         new ClipboardItem({ 'image/png': blob }),
       ]);
       setShareTip('已复制到剪贴板');
       setTimeout(() => setShareTip(''), 2000);
-    } catch {
-      // 剪贴板不支持时降级为下载
+    } catch (e) {
+      // 用户取消分享不算错误
+      if (e instanceof Error && e.name === 'AbortError') {
+        setSharing(false);
+        return;
+      }
+      // 降级为下载
       try {
         const svgEl = avatarRef.current?.querySelector('svg') as SVGSVGElement | null;
         const blob = await generateShareImage(type, svgEl);
