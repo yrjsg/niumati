@@ -2,7 +2,7 @@ import './globals.css';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: '牛马 TI · 牛马人格测试',
+  title: '码农牛马测试 · 你是哪种牛马？',
   description: '16 种打工人类型 · 16 道题 · 你是哪一种牛马？',
 };
 

@@ -4,6 +4,9 @@
  */
 
 import type { Niuma } from '@/lib/data';
+import QRCode from 'qrcode';
+
+const SITE_URL = 'https://niumati.vercel.app';
 
 const W = 750;
 const H = 1334;
@@ -128,15 +131,25 @@ export async function generateShareImage(
     y += 38;
   }
 
-  // ── 底部品牌 ──────────────────────────────────────────
-  ctx.textAlign = 'center';
-  ctx.font = 'bold 28px "PingFang SC", "Microsoft YaHei", sans-serif';
-  ctx.fillStyle = 'rgba(255,255,255,0.25)';
-  ctx.fillText('🐂 牛马测试', W / 2, H - 60);
+  // ── 底部：二维码 + 品牌 ────────────────────────────────
+  const qrSize = 140;
+  const qrY = H - 100 - qrSize;
+  try {
+    const qrDataUrl = await QRCode.toDataURL(SITE_URL, {
+      width: qrSize,
+      margin: 1,
+      color: { dark: '#ffffff', light: '#00000000' },
+    });
+    const qrImg = await loadImage(qrDataUrl);
+    ctx.drawImage(qrImg, (W - qrSize) / 2, qrY, qrSize, qrSize);
+  } catch {
+    // QR 生成失败时跳过
+  }
 
+  ctx.textAlign = 'center';
   ctx.font = '20px "PingFang SC", "Microsoft YaHei", sans-serif';
-  ctx.fillStyle = 'rgba(255,255,255,0.15)';
-  ctx.fillText('来测测你是哪种牛马', W / 2, H - 30);
+  ctx.fillStyle = 'rgba(255,255,255,0.35)';
+  ctx.fillText('扫码来测测你是哪种牛马 🐂', W / 2, qrY + qrSize + 30);
 
   // ── 导出 ──────────────────────────────────────────────
   return new Promise((resolve) => {

@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useMemo } from 'react';
 import Avatar from './avatar';
+import QRCodeBlock from './qrcode';
 import { generateShareImage } from './share';
 import {
   questions,
@@ -11,6 +12,9 @@ import {
   type Niuma,
   type Question,
 } from '@/lib/data';
+import pkg from '../package.json';
+
+const VERSION = pkg.version;
 
 type Stage = 'intro' | 'quiz' | 'result';
 
@@ -79,13 +83,52 @@ export default function Home() {
 
 // ============================================================
 
+function getGreeting(): string {
+  const now = new Date();
+  const day = now.getDay(); // 0=周日
+  const hour = now.getHours();
+  const min = now.getMinutes();
+  const dayNames = ['日', '一', '二', '三', '四', '五', '六'];
+  const dayName = dayNames[day];
+  const t = hour + min / 60; // 精确时间，如 14.5 = 14:30
+
+  // 周末
+  if (day === 0 || day === 6) {
+    if (hour < 10) return `周${dayName}早上${hour}点，牛马居然没有睡懒觉？是被OnCall叫醒的吗 😴`;
+    if (hour < 14) return `周${dayName}上午好，不会真有人周末还在加班吧？不会吧不会吧 🤡`;
+    if (hour < 18) return `周${dayName}下午${hour}点，请问你是在家摸鱼还是在公司摸鱼？ 🐟`;
+    return `周${dayName}晚上${hour}点，周末的夜晚属于自己——除非你还在改bug 🌙`;
+  }
+
+  // 工作日 · 牛马作息表
+  if (hour < 7) return `凌晨${hour}点还没睡？是加班到现在还是焦虑到现在？ 🥲`;
+  if (hour < 9) return `周${dayName}早上${hour}点，牛马还在被窝里，闹钟已经按掉三次了 😴`;
+  if (hour === 9) return `周${dayName}上午9点，牛马刚睁眼，离到公司还有一小时，不急 🥱`;
+  if (t < 10.5) return `周${dayName}上午${hour}点，牛马刚到工位，先泡杯咖啡打开电脑假装在启动 ☕`;
+  if (hour < 12) return `周${dayName}上午${hour}点，假装工作了一会儿，该想中午吃什么了 🤔`;
+  if (t < 12.5) return `周${dayName}中午12点，午饭时间！今天吃什么不重要，重要的是慢慢吃 🍜`;
+  if (t < 14) return `周${dayName}下午${hour}点，饭后遛弯中，这是牛马一天中最自由的时刻 🚶`;
+  if (t < 14.5) return `周${dayName}下午2点，趴在工位上午睡，口水流到键盘上了 😪💤`;
+  if (hour < 16) return `周${dayName}下午${hour}点，午睡醒了，假装打开IDE，实际上在刷手机 📱`;
+  if (hour < 17) return `周${dayName}下午${hour}点，奶茶时间到！今天喝什么？牛马的快乐就这么简单 🧋`;
+  if (hour < 18) return `周${dayName}下午${hour}点，奶茶喝完了，离晚饭还有一会儿，再摸一下 🐟`;
+  if (t < 19) return `周${dayName}傍晚${hour}点，晚饭+遛弯时间，牛马的第二次放风 🌆`;
+  if (hour < 21) return `周${dayName}晚上${hour}点，回到工位开始"工作"——打开B站叫工作吗？ 📺`;
+  if (t < 21.5) return `周${dayName}晚上9点半，再坚持一下！打车报销的时间快到了 🚕`;
+  if (hour < 22) return `周${dayName}晚上${hour}点，打车走人！今天又是充实的一天（并没有） 🏃‍♂️💨`;
+  if (hour < 23) return `周${dayName}晚上${hour}点，到家了，躺床上刷手机到凌晨，明天继续循环 📱🛏️`;
+  return `周${dayName}深夜${hour}点，还没睡？明天10点还要"早起"上班呢 🌚`;
+}
+
 function Intro({ onStart }: { onStart: () => void }) {
+  const greeting = useMemo(() => getGreeting(), []);
+
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-6 py-16">
-      <div className="max-w-xl w-full text-center">
+    <main className="min-h-screen flex flex-col px-6 py-16">
+      <div className="flex-1 flex flex-col items-center justify-center max-w-xl w-full mx-auto text-center">
         <div className="text-6xl mb-6">🐂</div>
-        <h1 className="text-6xl md:text-7xl font-bold mb-12 tracking-tight">
-          牛马测试
+        <h1 className="text-5xl md:text-7xl font-bold mb-12 tracking-tight">
+          码农牛马测试
         </h1>
 
         <button
@@ -95,9 +138,16 @@ function Intro({ onStart }: { onStart: () => void }) {
           开始测试 →
         </button>
 
-        <p className="mt-10 text-xs text-neutral-600">
+        <p className="mt-10 text-sm text-neutral-400 leading-relaxed px-4">
+          {greeting}
+        </p>
+      </div>
+
+      <div className="text-center">
+        <p className="text-xs text-neutral-600">
           免责声明：本测试纯属娱乐，结果不代表真实人格，更不代表绩效。
         </p>
+        <p className="mt-2 text-xs text-neutral-700 font-mono">v{VERSION}</p>
       </div>
     </main>
   );
@@ -119,13 +169,14 @@ function Quiz({
   const progress = (idx / total) * 100;
 
   return (
-    <main className="min-h-screen flex flex-col px-6 py-10 max-w-2xl mx-auto">
-      <div className="mb-12">
+    <main className="h-screen flex flex-col px-6 py-10 max-w-2xl mx-auto overflow-hidden">
+      {/* 顶部进度条 — 固定高度 */}
+      <div className="shrink-0 mb-6">
         <div className="flex items-center justify-between mb-3">
           <span className="text-xs text-neutral-500 font-mono">
             {String(idx + 1).padStart(2, '0')} / {total}
           </span>
-          <span className="text-xs text-neutral-500">牛马测试</span>
+          <span className="text-xs text-neutral-500">码农牛马测试</span>
         </div>
         <div className="h-1 bg-neutral-900 rounded-full overflow-hidden">
           <div
@@ -135,29 +186,31 @@ function Quiz({
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col justify-center">
-        <h2 className="text-2xl md:text-3xl font-semibold mb-10 leading-relaxed">
+      {/* 题目区域 — 靠上 */}
+      <div className="shrink-0 pt-4 pb-8">
+        <h2 className="text-2xl md:text-3xl font-semibold leading-relaxed">
           {q.scenario}
         </h2>
+      </div>
 
-        <div className="flex flex-col gap-4">
-          {q.choices.map((c, i) => (
-            <button
-              key={i}
-              onClick={() => onAnswer(c.value)}
-              className="group p-6 bg-neutral-950 hover:bg-neutral-900 border border-neutral-800 hover:border-neutral-600 rounded-xl text-left transition-all"
-            >
-              <div className="flex items-start gap-4">
-                <div className="w-8 h-8 shrink-0 rounded-full border border-neutral-700 group-hover:border-white flex items-center justify-center text-sm text-neutral-500 group-hover:text-white font-mono transition">
-                  {String.fromCharCode(65 + i)}
-                </div>
-                <div className="text-neutral-200 group-hover:text-white text-base md:text-lg">
-                  {c.text}
-                </div>
+      {/* 选项区域 — 固定在屏幕中上部 */}
+      <div className="flex-1 flex flex-col justify-start pt-[10vh] gap-3 min-h-0">
+        {q.choices.map((c, i) => (
+          <button
+            key={i}
+            onClick={() => onAnswer(c.value)}
+            className="group p-5 bg-neutral-950 hover:bg-neutral-900 border border-neutral-800 hover:border-neutral-600 rounded-xl text-left transition-all"
+          >
+            <div className="flex items-start gap-4">
+              <div className="w-8 h-8 shrink-0 rounded-full border border-neutral-700 group-hover:border-white flex items-center justify-center text-sm text-neutral-500 group-hover:text-white font-mono transition">
+                {String.fromCharCode(65 + i)}
               </div>
-            </button>
-          ))}
-        </div>
+              <div className="text-neutral-200 group-hover:text-white text-base md:text-lg">
+                {c.text}
+              </div>
+            </div>
+          </button>
+        ))}
       </div>
     </main>
   );
@@ -165,11 +218,34 @@ function Quiz({
 
 // ============================================================
 
+const FAMOUS_QUOTES = [
+  { text: '有些人出生在罗马，有些人出生就是牛马。', author: '鲁迅（可能说过）' },
+  { text: '我思故我在，我卷故我累。', author: '笛卡尔·加班版' },
+  { text: '生活不止眼前的苟且，还有明天和后天的苟且。', author: '高晓松·打工版' },
+  { text: '天将降大任于斯人也，必先让他改需求。', author: '孟子·互联网版' },
+  { text: '人生就像一盒巧克力，你永远不知道下一个 bug 在哪。', author: '阿甘·程序员版' },
+  { text: '不要问公司能为你做什么，要问你今晚能不能加班。', author: '肯尼迪·HR版' },
+  { text: '世界上只有两种程序员：被骂过的和没被发现的。', author: '佚名' },
+  { text: '三十年河东，三十年河西，打工人永远在河里。', author: '民间智慧' },
+  { text: '给我一个支点，我能撬动整个项目的进度条——往后退。', author: '阿基米德·PM版' },
+  { text: '代码写得好，不如PPT做得好。', author: '职场达尔文' },
+  { text: '我来，我见，我加班。', author: '凯撒·字节版' },
+  { text: '知识就是力量，但改不了你是牛马的事实。', author: '培根·现实版' },
+  { text: '世上无难事，只要肯放弃。', author: '毛主席·摸鱼版' },
+  { text: '每一个成功的项目背后，都有一群濒临崩溃的牛马。', author: '项目管理学' },
+  { text: '长风破浪会有时，直挂云帆去摸鱼。', author: '李白·当代版' },
+  { text: '落霞与孤鹜齐飞，加班与bug共一色。', author: '王勃·996版' },
+];
+
+function pickQuote() {
+  return FAMOUS_QUOTES[Math.floor(Math.random() * FAMOUS_QUOTES.length)];
+}
+
 function Result({ type, onReset }: { type: Niuma; onReset: () => void }) {
-  const nemesis = getTypeByCode(type.nemesis);
   const avatarRef = useRef<HTMLDivElement>(null);
   const [sharing, setSharing] = useState(false);
   const [shareTip, setShareTip] = useState('');
+  const quote = useMemo(() => pickQuote(), []);
 
   const handleShare = useCallback(async () => {
     setSharing(true);
@@ -206,36 +282,35 @@ function Result({ type, onReset }: { type: Niuma; onReset: () => void }) {
 
   return (
     <main className="min-h-screen flex flex-col px-6 py-12 max-w-2xl mx-auto">
-      <div className="text-center mb-10">
-        <div className="mb-4" ref={avatarRef}>
-          <Avatar code={type.code} size={160} />
+      <div className="flex items-center gap-6 mb-10">
+        <div className="shrink-0" ref={avatarRef}>
+          <Avatar code={type.code} size={120} />
         </div>
-        <p className="text-xs text-neutral-500 mb-2 tracking-widest uppercase">
-          你的牛马类型
-        </p>
-        <div className="font-mono text-5xl font-bold tracking-wider mb-4">
-          {type.code}
+        <div>
+          <p className="text-xs text-neutral-500 mb-1 tracking-widest uppercase">
+            你的牛马类型
+          </p>
+          <div className="font-mono text-4xl md:text-5xl font-bold tracking-wider mb-2">
+            {type.code}
+          </div>
+          <h1 className="text-2xl md:text-3xl font-bold mb-2">{type.name}</h1>
+          <p className="text-neutral-400 italic text-sm">「{type.tagline}」</p>
         </div>
-        <h1 className="text-3xl md:text-4xl font-bold mb-3">{type.name}</h1>
-        <p className="text-neutral-400 italic">「{type.tagline}」</p>
       </div>
 
       <p className="text-neutral-300 leading-loose mb-10 text-base md:text-lg">
         {type.description}
       </p>
 
-      <div className="space-y-5 mb-12">
-        <Info label="本命技能" value={type.skill} />
-        <Info label="口头禅" value={type.quotes.map((q) => `"${q}"`).join(' · ')} />
-        <Info
-          label="天敌"
-          value={
-            nemesis
-              ? `${nemesis.emoji} ${nemesis.name} (${nemesis.code})`
-              : '—'
-          }
-        />
-        <Info label="团建行为" value={type.teamBuilding} />
+      <div className="bg-neutral-900/50 border border-neutral-800 rounded-xl p-6 mb-10 text-center">
+        <p className="text-neutral-300 italic text-base leading-relaxed mb-2">
+          「{quote.text}」
+        </p>
+        <p className="text-neutral-600 text-xs">—— {quote.author}</p>
+      </div>
+
+      <div className="flex justify-center mb-10">
+        <QRCodeBlock size={120} />
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3">
@@ -253,15 +328,8 @@ function Result({ type, onReset }: { type: Niuma; onReset: () => void }) {
           {sharing ? '生成中...' : shareTip || '分享结果'}
         </button>
       </div>
-    </main>
-  );
-}
 
-function Info({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="border-l-2 border-neutral-800 pl-4">
-      <div className="text-xs text-neutral-500 mb-1 tracking-wide">{label}</div>
-      <div className="text-neutral-200">{value}</div>
-    </div>
+      <p className="mt-8 text-center text-xs text-neutral-700 font-mono">v{VERSION}</p>
+    </main>
   );
 }
