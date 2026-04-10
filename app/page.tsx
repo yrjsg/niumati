@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import Avatar from './avatar';
+import { generateShareImage } from './share';
 import {
   questions,
   computeResult,
@@ -166,10 +167,42 @@ function Quiz({
 
 function Result({ type, onReset }: { type: Niuma; onReset: () => void }) {
   const nemesis = getTypeByCode(type.nemesis);
+  const avatarRef = useRef<HTMLDivElement>(null);
+  const [sharing, setSharing] = useState(false);
+
+  const handleShare = useCallback(async () => {
+    setSharing(true);
+    try {
+      const svgEl = avatarRef.current?.querySelector('svg') as SVGSVGElement | null;
+      const blob = await generateShareImage(type, svgEl);
+      const file = new File([blob], `niumati-${type.code}.png`, { type: 'image/png' });
+
+      if (navigator.share && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({
+          title: '牛马测试',
+          text: `我是【${type.code} · ${type.name}】`,
+          files: [file],
+        });
+      } else {
+        // 降级：下载图片
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `niumati-${type.code}.png`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+    } catch {
+      // 用户取消分享，忽略
+    } finally {
+      setSharing(false);
+    }
+  }, [type]);
+
   return (
     <main className="min-h-screen flex flex-col px-6 py-12 max-w-2xl mx-auto">
       <div className="text-center mb-10">
-        <div className="mb-4">
+        <div className="mb-4" ref={avatarRef}>
           <Avatar code={type.code} size={160} />
         </div>
         <p className="text-xs text-neutral-500 mb-2 tracking-widest uppercase">
@@ -208,20 +241,11 @@ function Result({ type, onReset }: { type: Niuma; onReset: () => void }) {
           再测一次
         </button>
         <button
-          onClick={() => {
-            const text = `我是【${type.code} · ${type.name}】${type.emoji}\n「${type.tagline}」\n来测你的牛马 TI →`;
-            if (navigator.share) {
-              navigator
-                .share({ title: '牛马 TI', text })
-                .catch(() => navigator.clipboard.writeText(text));
-            } else {
-              navigator.clipboard.writeText(text);
-              alert('已复制到剪贴板');
-            }
-          }}
-          className="flex-1 px-6 py-3 bg-white text-black hover:bg-neutral-200 rounded-full font-semibold transition"
+          onClick={handleShare}
+          disabled={sharing}
+          className="flex-1 px-6 py-3 bg-white text-black hover:bg-neutral-200 rounded-full font-semibold transition disabled:opacity-50"
         >
-          分享结果
+          {sharing ? '生成中...' : '分享结果'}
         </button>
       </div>
     </main>
