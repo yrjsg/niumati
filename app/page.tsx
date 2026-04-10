@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Avatar from './avatar';
 import {
   questions,
   computeResult,
@@ -168,7 +169,9 @@ function Result({ type, onReset }: { type: Niuma; onReset: () => void }) {
   return (
     <main className="min-h-screen flex flex-col px-6 py-12 max-w-2xl mx-auto">
       <div className="text-center mb-10">
-        <div className="text-7xl mb-4">{type.emoji}</div>
+        <div className="mb-4">
+          <Avatar code={type.code} size={160} />
+        </div>
         <p className="text-xs text-neutral-500 mb-2 tracking-widest uppercase">
           你的牛马类型
         </p>
