@@ -255,12 +255,10 @@ function Result({ type, onReset }: { type: Niuma; onReset: () => void }) {
       const file = new File([blob], `niumati-${type.code}.jpg`, { type: 'image/jpeg' });
 
       // 优先使用系统分享（手机端）
+      // 注意：同时传 title/text + files 时，部分手机不显示图片预览
+      // 只传 files 可确保图片预览正常显示
       if (navigator.share && navigator.canShare?.({ files: [file] })) {
-        await navigator.share({
-          title: `我是${type.name}（${type.code}）`,
-          text: `「${type.tagline}」—— 码农牛马测试`,
-          files: [file],
-        });
+        await navigator.share({ files: [file] });
         setShareTip('分享成功');
         setTimeout(() => setShareTip(''), 2000);
         return;
@@ -313,7 +311,7 @@ function Result({ type, onReset }: { type: Niuma; onReset: () => void }) {
     } finally {
       setSharing(false);
     }
-  }, [type]);
+  }, [type, quote]);
 
   return (
     <main className="min-h-screen flex flex-col px-6 py-12 max-w-2xl mx-auto">
