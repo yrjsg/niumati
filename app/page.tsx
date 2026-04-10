@@ -32,7 +32,11 @@ function sampleQuestions(): Question[] {
     const shuffled = [...group].sort(() => Math.random() - 0.5);
     picked.push(...shuffled.slice(0, 4));
   }
-  return picked;
+  // 打乱每题的选项顺序（避免 null 总是 C）
+  return picked.map(q => ({
+    ...q,
+    choices: [...q.choices].sort(() => Math.random() - 0.5),
+  }));
 }
 
 export default function Home() {
