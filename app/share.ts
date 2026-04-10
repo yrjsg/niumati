@@ -154,9 +154,9 @@ export async function generateShareImage(
   ctx.fillStyle = 'rgba(255,255,255,0.2)';
   ctx.fillText('🐂 码农牛马测试', W / 2, H - 40);
 
-  // ── 导出 JPEG ─────────────────────────────────────────
+  // ── 导出 PNG（PNG 在手机分享面板中预览兼容性更好）────
   return new Promise((resolve) => {
-    canvas.toBlob((blob) => resolve(blob!), 'image/jpeg', 0.92);
+    canvas.toBlob((blob) => resolve(blob!), 'image/png');
   });
 }
 

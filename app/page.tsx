@@ -252,11 +252,10 @@ function Result({ type, onReset }: { type: Niuma; onReset: () => void }) {
     try {
       const svgEl = avatarRef.current?.querySelector('svg') as SVGSVGElement | null;
       const blob = await generateShareImage(type, svgEl, quote);
-      const file = new File([blob], `niumati-${type.code}.jpg`, { type: 'image/jpeg' });
+      const file = new File([blob], `niumati-${type.code}.png`, { type: 'image/png' });
 
       // 优先使用系统分享（手机端）
-      // 注意：同时传 title/text + files 时，部分手机不显示图片预览
-      // 只传 files 可确保图片预览正常显示
+      // 只传 files，不传 title/text，确保图片预览正常显示
       if (navigator.share && navigator.canShare?.({ files: [file] })) {
         await navigator.share({ files: [file] });
         setShareTip('分享成功');
@@ -264,26 +263,9 @@ function Result({ type, onReset }: { type: Niuma; onReset: () => void }) {
         return;
       }
 
-      // 桌面端：复制到剪贴板（剪贴板需要PNG格式）
-      // 将JPEG转为PNG用于剪贴板
-      const pngCanvas = document.createElement('canvas');
-      const img = new Image();
-      const blobUrl = URL.createObjectURL(blob);
-      await new Promise<void>((resolve) => {
-        img.onload = () => {
-          pngCanvas.width = img.width;
-          pngCanvas.height = img.height;
-          pngCanvas.getContext('2d')!.drawImage(img, 0, 0);
-          URL.revokeObjectURL(blobUrl);
-          resolve();
-        };
-        img.src = blobUrl;
-      });
-      const pngBlob = await new Promise<Blob>((resolve) => {
-        pngCanvas.toBlob((b) => resolve(b!), 'image/png');
-      });
+      // 桌面端：复制到剪贴板（已经是 PNG 格式，直接用）
       await navigator.clipboard.write([
-        new ClipboardItem({ 'image/png': pngBlob }),
+        new ClipboardItem({ 'image/png': blob }),
       ]);
       setShareTip('已复制到剪贴板');
       setTimeout(() => setShareTip(''), 2000);
@@ -300,7 +282,7 @@ function Result({ type, onReset }: { type: Niuma; onReset: () => void }) {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `niumati-${type.code}.jpg`;
+        a.download = `niumati-${type.code}.png`;
         a.click();
         URL.revokeObjectURL(url);
         setShareTip('已下载图片');
